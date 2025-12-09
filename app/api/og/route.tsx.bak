@@ -1,0 +1,90 @@
+import { ImageResponse } from 'next/og'
+
+export const runtime = 'edge'
+
+export async function GET(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url)
+        const title = searchParams.get('title') || '심리테스트 플랫폼'
+        const description = searchParams.get('description') || '나만의 심리테스트를 만들어보세요'
+        const themeColor = searchParams.get('color') || '#8b5cf6'
+
+        return new ImageResponse(
+            (
+                <div
+                    style={{
+                        height: '100%',
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: '#fff',
+                        backgroundImage: `linear-gradient(to bottom right, #fff 50%, ${themeColor}20 100%)`,
+                    }}
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'white',
+                            borderRadius: '20px',
+                            padding: '40px 60px',
+                            boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25)',
+                            border: `4px solid ${themeColor}`,
+                            maxWidth: '80%',
+                            textAlign: 'center',
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontSize: 60,
+                                fontWeight: 900,
+                                background: `linear-gradient(to right, ${themeColor}, #ec4899)`,
+                                backgroundClip: 'text',
+                                color: 'transparent',
+                                marginBottom: 20,
+                                lineHeight: 1.2,
+                            }}
+                        >
+                            {title}
+                        </div>
+                        <div
+                            style={{
+                                fontSize: 30,
+                                color: '#64748b',
+                                lineHeight: 1.4,
+                            }}
+                        >
+                            {description}
+                        </div>
+                    </div>
+                    <div
+                        style={{
+                            position: 'absolute',
+                            bottom: 40,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                        }}
+                    >
+                        <div style={{ fontSize: 24, fontWeight: 'bold', color: '#0f172a' }}>
+                            심리테스트 플랫폼
+                        </div>
+                    </div>
+                </div>
+            ),
+            {
+                width: 1200,
+                height: 630,
+            }
+        )
+    } catch (e: any) {
+        console.log(`${e.message}`)
+        return new Response(`Failed to generate the image`, {
+            status: 500,
+        })
+    }
+}
