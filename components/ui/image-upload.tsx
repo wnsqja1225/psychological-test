@@ -16,9 +16,10 @@ interface ImageUploadProps {
     placeholder?: string
     aspect?: number
     className?: string
+    fit?: 'cover' | 'contain'
 }
 
-export function ImageUpload({ value, onChange, placeholder = "이미지 업로드", aspect = 16 / 9, className }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, placeholder = "이미지 업로드", aspect = 16 / 9, className, fit = 'cover' }: ImageUploadProps) {
     const supabase = createClient()
     const [uploading, setUploading] = useState(false)
     const [cropperOpen, setCropperOpen] = useState(false)
@@ -87,7 +88,7 @@ export function ImageUpload({ value, onChange, placeholder = "이미지 업로�
                         src={value}
                         alt="Uploaded image"
                         fill
-                        className="object-cover"
+                        className={cn("transition-all", fit === 'contain' ? 'object-contain' : 'object-cover')}
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <Button

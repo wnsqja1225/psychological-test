@@ -304,7 +304,7 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                         </div>
                                         <div className="grid gap-2">
                                             <label className="font-medium">썸네일</label>
-                                            <ImageUpload value={thumbnailUrl} onChange={setThumbnailUrl} />
+                                            <ImageUpload value={thumbnailUrl} onChange={setThumbnailUrl} fit="contain" />
                                         </div>
                                         <div className="grid gap-2">
                                             <label className="font-medium">정렬 순서 (우선순위)</label>
@@ -346,6 +346,15 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                     onChange={(url) => setAdConfig({ ...adConfig, imageUrl: url })}
                                                     placeholder="광고 배너 이미지 업로드"
                                                 />
+                                                <div className="mt-1">
+                                                    <p className="text-xs text-muted-foreground mb-1">또는 이미지 URL 직접 입력</p>
+                                                    <Input
+                                                        placeholder="https://example.com/banner.jpg"
+                                                        value={adConfig.imageUrl}
+                                                        onChange={(e) => setAdConfig({ ...adConfig, imageUrl: e.target.value })}
+                                                        className="h-8 text-xs"
+                                                    />
+                                                </div>
                                             </div>
                                             <div className="grid gap-2">
                                                 <label className="font-medium">광고 링크 URL</label>
@@ -763,7 +772,7 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                             isFilled && !isSelected && "bg-green-50/50 border-green-200"
                                                         )}
                                                     >
-                                                        <span className={cn("font-bold text-sm z-10", isSelected ? "text-primary" : "text-muted-foreground")}>
+                                                        <span className={cn("font-bold z-10", isSelected ? "text-primary text-base" : "text-muted-foreground text-sm")}>
                                                             {r.mbti_result}
                                                         </span>
                                                         {isFilled && (
@@ -772,7 +781,7 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                             </div>
                                                         )}
                                                         {!isFilled && !isSelected && (
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-slate-200 mt-1" />
+                                                            <div className="w-2 h-2 rounded-full bg-slate-300 mt-1" />
                                                         )}
                                                     </button>
                                                 )
@@ -808,8 +817,10 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                         <ImageUpload
                                                             value={results[selectedResultIndex].image_url}
                                                             onChange={(url) => updateResult(selectedResultIndex, 'image_url', url)}
-                                                            placeholder="결과 이미지 업로드"
-                                                            className="h-64"
+                                                            placeholder="결과 이미지 업로드 (9:16 비율 권장)"
+                                                            className="h-96"
+                                                            aspect={9 / 16}
+                                                            fit="contain"
                                                         />
 
                                                         {/* Image Layout Controls */}
