@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CustomAdBanner } from '@/components/custom-ad-banner'
 import React from 'react'
 import { cn } from '@/lib/utils'
 
@@ -125,13 +124,15 @@ export function PhonePreview({ question, result, themeColor, totalQuestions = 0,
                                             {/* Background Image */}
                                             {question?.image_url ? (
                                                 <div
-                                                    className="absolute inset-0 w-full h-full"
+                                                    className="absolute inset-0 w-full h-full bg-black"
                                                     onMouseDown={handleMouseDown}
                                                 >
                                                     <Image
                                                         src={question.image_url}
                                                         alt="Background"
                                                         fill
+                                                        priority
+                                                        sizes="(max-width: 768px) 100vw, 500px"
                                                         className="object-cover pointer-events-none"
                                                         style={{
                                                             objectPosition: `${new URLSearchParams(new URL(question.image_url, 'http://d.com').search).get('x') || 50}% ${new URLSearchParams(new URL(question.image_url, 'http://d.com').search).get('y') || 50}%`,
@@ -237,7 +238,7 @@ export function PhonePreview({ question, result, themeColor, totalQuestions = 0,
                                             <div className="w-[95%] h-[60%] bg-white rounded-xl shadow-xl border border-black/5 flex flex-col overflow-hidden relative z-10">
                                                 {question?.image_url ? (
                                                     <div className="flex-1 relative">
-                                                        <Image src={question.image_url} alt="Question" fill className="object-cover" />
+                                                        <Image src={question.image_url} alt="Question" fill className="object-cover" sizes="300px" />
                                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                                         <div className="absolute bottom-4 left-4 text-white font-bold text-xl drop-shadow-md">
                                                             {question?.content || "질문 내용"}
@@ -292,6 +293,7 @@ export function PhonePreview({ question, result, themeColor, totalQuestions = 0,
                                                             src={question.image_url}
                                                             alt="Question"
                                                             fill
+                                                            sizes="300px"
                                                             className="rounded-lg object-cover shadow-md pointer-events-none"
                                                             style={{
                                                                 objectPosition: `${new URLSearchParams(new URL(question.image_url, 'http://d.com').search).get('x') || 50}% ${new URLSearchParams(new URL(question.image_url, 'http://d.com').search).get('y') || 50}%`,
@@ -343,14 +345,31 @@ export function PhonePreview({ question, result, themeColor, totalQuestions = 0,
                                 <div className="p-4 pt-0 space-y-4">
                                     {result?.image_url ? (
                                         <div className="aspect-video w-full overflow-hidden rounded-xl relative shadow-lg">
-                                            <Image src={result.image_url} alt="Result" fill className="object-cover" />
+                                            <Image
+                                                src={result.image_url}
+                                                alt="Result"
+                                                fill
+                                                sizes="400px"
+                                                className="object-cover"
+                                                style={{
+                                                    objectPosition: `${50 + (result.layout_config?.x || 0)}% ${50 + (result.layout_config?.y || 0)}%`,
+                                                    transform: `scale(${(result.layout_config?.zoom || 100) / 100})`
+                                                }}
+                                            />
                                         </div>
                                     ) : (
                                         <div className="aspect-video w-full bg-secondary/20 rounded-xl flex items-center justify-center text-muted-foreground text-sm">
                                             이미지 없음
                                         </div>
                                     )}
-                                    <div className="bg-secondary/30 p-3 rounded-lg text-sm max-h-[150px] overflow-y-auto">
+                                    <div
+                                        className="bg-secondary/30 p-3 rounded-lg max-h-[150px] overflow-y-auto transition-all duration-300"
+                                        style={{
+                                            fontSize: result?.layout_config?.fontSize === 'small' ? '0.875rem' :
+                                                result?.layout_config?.fontSize === 'large' ? '1.125rem' :
+                                                    result?.layout_config?.fontSize === 'xlarge' ? '1.25rem' : '1rem'
+                                        }}
+                                    >
                                         {result?.description || '결과 설명이 여기에 표시됩니다.'}
                                     </div>
                                 </div>
