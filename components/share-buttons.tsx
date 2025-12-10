@@ -24,9 +24,8 @@ export function ShareButtons({ title, description, imageUrl }: ShareButtonsProps
     useEffect(() => {
         if (typeof window !== 'undefined' && window.Kakao) {
             if (!window.Kakao.isInitialized()) {
-                // Replace with your actual Kakao JavaScript Key
-                // You can find it in Kakao Developers Console
-                window.Kakao.init('YOUR_KAKAO_JAVASCRIPT_KEY')
+                // Initialize with env var
+                window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JAVASCRIPT_KEY)
             }
         }
     }, [])

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@/components/analytics";
 
 export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -40,6 +41,7 @@ export default function RootLayout({
                 <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID}`} crossOrigin="anonymous"></script>
             </head>
             <body className="font-sans antialiased min-h-screen bg-background text-foreground" suppressHydrationWarning>
+                <Analytics />
                 <main className="min-h-screen bg-background">
                     {children}
                 </main>

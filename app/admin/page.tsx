@@ -12,6 +12,7 @@ export default function AdminDashboard() {
     const supabase = createClient()
     const [tests, setTests] = useState<any[]>([])
     const [resultsData, setResultsData] = useState<any[]>([])
+    const [selectedTests, setSelectedTests] = useState<string[]>([])
 
     useEffect(() => {
         fetchTests()
@@ -32,6 +33,30 @@ export default function AdminDashboard() {
         if (confirm('정말 삭제하시겠습니까?')) {
             await supabase.from('tests').delete().eq('id', id)
             fetchTests()
+            setSelectedTests(prev => prev.filter(tid => tid !== id))
+        }
+    }
+
+    const deleteSelectedTests = async () => {
+        if (selectedTests.length === 0) return
+        if (confirm(`선택한 ${selectedTests.length}개의 테스트를 삭제하시겠습니까?`)) {
+            await supabase.from('tests').delete().in('id', selectedTests)
+            fetchTests()
+            setSelectedTests([])
+        }
+    }
+
+    const toggleSelection = (id: string) => {
+        setSelectedTests(prev =>
+            prev.includes(id) ? prev.filter(tid => tid !== id) : [...prev, id]
+        )
+    }
+
+    const toggleSelectAll = () => {
+        if (selectedTests.length === tests.length) {
+            setSelectedTests([])
+        } else {
+            setSelectedTests(tests.map(t => t.id))
         }
     }
 
@@ -127,7 +152,21 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">내 테스트 목록 ({tests.length})</h2>
+                <div className="flex items-center gap-4">
+                    <h2 className="text-xl font-bold">내 테스트 목록 ({tests.length})</h2>
+                    {tests.length > 0 && (
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={toggleSelectAll}>
+                                {selectedTests.length === tests.length ? '전체 해제' : '전체 선택'}
+                            </Button>
+                            {selectedTests.length > 0 && (
+                                <Button variant="destructive" size="sm" onClick={deleteSelectedTests}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> 선택 삭제 ({selectedTests.length})
+                                </Button>
+                            )}
+                        </div>
+                    )}
+                </div>
                 <Link href="/admin/create">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" /> 새 테스트 만들기
@@ -153,7 +192,10 @@ export default function AdminDashboard() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {tests.map((test) => (
-                        <Card key={test.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden border-2 hover:border-primary/50">
+                        <Card
+                            key={test.id}
+                            className={`group hover:shadow-lg transition-all duration-300 overflow-hidden border-2 ${selectedTests.includes(test.id) ? 'border-primary ring-2 ring-primary ring-offset-2' : 'hover:border-primary/50'}`}
+                        >
                             <div className="aspect-video relative bg-muted">
                                 {test.thumbnail_url ? (
                                     <img
@@ -167,6 +209,18 @@ export default function AdminDashboard() {
                                     </div>
                                 )}
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+
+                                {/* Checkbox */}
+                                <div className="absolute top-2 left-2 z-10">
+                                    <input
+                                        type="checkbox"
+                                        className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer shadow-sm"
+                                        checked={selectedTests.includes(test.id)}
+                                        onChange={() => toggleSelection(test.id)}
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </div>
+
                                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                                     <Button size="icon" variant="secondary" className="h-8 w-8 shadow-sm" onClick={() => duplicateTest(test)} title="복제">
                                         <Copy className="h-4 w-4" />

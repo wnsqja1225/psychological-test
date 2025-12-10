@@ -31,9 +31,23 @@ export default function Home() {
     }, [sort])
 
     const fetchTests = async () => {
-        const { data, error } = await supabase.from('tests').select('*')
-        if (!error) {
-            setTests(data || [])
+        const { data, error } = await supabase.from('tests').select('*').order('created_at', { ascending: false })
+        if (!error && data) {
+            const processed = data.map(test => {
+                const priorityMatch = test.description?.match(/<!-- priority: (\d+) -->/)
+                const priority = priorityMatch ? parseInt(priorityMatch[1]) : 0
+                const cleanDescription = test.description?.replace(/<!-- priority: \d+ -->/g, '').trim()
+                return { ...test, description: cleanDescription, priority }
+            })
+
+            if (sort === 'popular') {
+                processed.sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+            } else {
+                // Default: Priority Desc -> Created At Desc (stable sort relies on DB order)
+                processed.sort((a, b) => b.priority - a.priority)
+            }
+
+            setTests(processed)
         }
     }
 
@@ -57,8 +71,8 @@ export default function Home() {
                 <h1 className="text-5xl md:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                     나를 발견하는 여행
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                    MBTI부터 심층 심리 분석까지, 당신의 진짜 모습을 찾아보세요.
+                <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in-up delay-100">
+                    당신의 진짜 모습을 찾아보세요.
                 </p>
             </motion.header>
 
@@ -88,7 +102,7 @@ export default function Home() {
                 </Button>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                 {filteredTests.map((test, index) => (
                     <motion.div
                         key={test.id}
