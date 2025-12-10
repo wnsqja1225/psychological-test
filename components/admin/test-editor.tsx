@@ -44,6 +44,7 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
     const [selectedResultIndex, setSelectedResultIndex] = useState(0)
     const [previewQuestionIndex, setPreviewQuestionIndex] = useState(0)
     const [priority, setPriority] = useState(0)
+    const [adConfig, setAdConfig] = useState(initialData?.ad_config || { imageUrl: '', linkUrl: '' })
 
     // Parse priority from description on load
     useEffect(() => {
@@ -150,7 +151,8 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                     description: finalDescription,
                     thumbnail_url: thumbnailUrl,
                     theme_color: themeColor,
-                    type: 'mbti'
+                    type: 'mbti',
+                    ad_config: adConfig
                 }).select().single()
 
                 if (error) throw error
@@ -160,7 +162,8 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                     title,
                     description: finalDescription,
                     thumbnail_url: thumbnailUrl,
-                    theme_color: themeColor
+                    theme_color: themeColor,
+                    ad_config: adConfig
                 }).eq('id', testId)
                 if (error) throw error
 
@@ -205,8 +208,9 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                 title: r.title,
                 description: r.description,
                 image_url: r.image_url,
-                min_score: 0, // Fix: Provide default value
-                max_score: 0  // Fix: Provide default value
+                min_score: 0,
+                max_score: 0,
+                layout_config: r.layout_config || {}
             }))
 
             const { error: rError } = await supabase.from('results').insert(resultsToInsert)
@@ -224,18 +228,16 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
 
     return (
         <div className="flex flex-col h-[calc(100vh-4rem)]">
-            {/* Toolbar */}
-            <div className="border-b bg-background p-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" onClick={() => router.back()}>
-                        <ArrowLeft className="mr-2 h-4 w-4" /> 뒤로가기
-                    </Button>
-                    <h1 className="text-xl font-bold">{mode === 'create' ? '새 테스트 만들기' : '테스트 수정'}</h1>
-                </div>
-                <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Save className="mr-2 h-4 w-4" /> 저장하기
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" onClick={() => router.back()}>
+                    <ArrowLeft className="mr-2 h-4 w-4" /> 뒤로가기
                 </Button>
+                <h1 className="text-xl font-bold">{mode === 'create' ? '새 테스트 만들기' : '테스트 수정'}</h1>
             </div>
+            <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Save className="mr-2 h-4 w-4" /> 저장하기
+            </Button>
+
 
             {/* Custom Tabs */}
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -332,6 +334,26 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                         title={color.name}
                                                     />
                                                 ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-4 pt-4 border-t">
+                                            <h3 className="font-bold text-lg">광고 설정</h3>
+                                            <div className="grid gap-2">
+                                                <label className="font-medium">광고 이미지 URL</label>
+                                                <ImageUpload
+                                                    value={adConfig.imageUrl}
+                                                    onChange={(url) => setAdConfig({ ...adConfig, imageUrl: url })}
+                                                    placeholder="광고 배너 이미지 업로드"
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <label className="font-medium">광고 링크 URL</label>
+                                                <Input
+                                                    placeholder="https://example.com"
+                                                    value={adConfig.linkUrl}
+                                                    onChange={(e) => setAdConfig({ ...adConfig, linkUrl: e.target.value })}
+                                                />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -516,14 +538,14 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                                 </label>
                                                                 <div className="flex gap-2">
                                                                     <select
-                                                                        className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500"
+                                                                        className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs font-medium focus:ring-2 focus:ring-indigo-500 text-black"
                                                                         value={q.layout_type || 'default'}
                                                                         onChange={(e) => updateQuestion(index, 'layout_type', e.target.value)}
                                                                     >
-                                                                        <option value="default">기본 (박스형)</option>
-                                                                        <option value="fullscreen">전체 화면 (몰입형)</option>
-                                                                        <option value="chat">채팅형 (메신저)</option>
-                                                                        <option value="swipe">스와이프 (틴더)</option>
+                                                                        <option value="default" className="text-black">기본 (박스형)</option>
+                                                                        <option value="fullscreen" className="text-black">전체 화면 (몰입형)</option>
+                                                                        <option value="chat" className="text-black">채팅형 (메신저)</option>
+                                                                        <option value="swipe" className="text-black">스와이프 (틴더)</option>
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -548,14 +570,14 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                                 <div className="space-y-2">
                                                                     <label className="text-xs font-medium text-slate-500">선택지 스타일</label>
                                                                     <select
-                                                                        className="w-full h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
+                                                                        className="w-full h-8 rounded-md border border-slate-300 bg-white px-2 text-xs text-black"
                                                                         value={q.option_style || 'default'}
                                                                         onChange={(e) => updateQuestion(index, 'option_style', e.target.value)}
                                                                     >
-                                                                        <option value="default">기본 (흰색)</option>
-                                                                        <option value="glass">글래스 (반투명)</option>
-                                                                        <option value="dark">다크 (검정)</option>
-                                                                        <option value="outline">아웃라인</option>
+                                                                        <option value="default" className="text-black">기본 (흰색)</option>
+                                                                        <option value="glass" className="text-black">글래스 (반투명)</option>
+                                                                        <option value="dark" className="text-black">다크 (검정)</option>
+                                                                        <option value="outline" className="text-black">아웃라인</option>
                                                                     </select>
                                                                 </div>
 
@@ -563,17 +585,17 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                                 <div className="space-y-2">
                                                                     <label className="text-xs font-medium text-slate-500">폰트 크기</label>
                                                                     <select
-                                                                        className="w-full h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
+                                                                        className="w-full h-8 rounded-md border border-slate-300 bg-white px-2 text-xs text-black"
                                                                         value={q.layout_config?.fontSize || 'medium'}
                                                                         onChange={(e) => {
                                                                             const newConfig = { ...(q.layout_config || {}), fontSize: e.target.value }
                                                                             updateQuestion(index, 'layout_config', newConfig)
                                                                         }}
                                                                     >
-                                                                        <option value="small">작게</option>
-                                                                        <option value="medium">보통</option>
-                                                                        <option value="large">크게</option>
-                                                                        <option value="xlarge">아주 크게</option>
+                                                                        <option value="small" className="text-black">작게</option>
+                                                                        <option value="medium" className="text-black">보통</option>
+                                                                        <option value="large" className="text-black">크게</option>
+                                                                        <option value="xlarge" className="text-black">아주 크게</option>
                                                                     </select>
                                                                 </div>
 
@@ -767,6 +789,66 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                                                             onChange={(url) => updateResult(selectedResultIndex, 'image_url', url)}
                                                             placeholder="결과 이미지 업로드"
                                                         />
+
+                                                        {/* Image Layout Controls */}
+                                                        {results[selectedResultIndex].image_url && (
+                                                            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100 space-y-4 mt-2">
+                                                                <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                                                                    <Settings2 className="w-3 h-3" /> 이미지 상세 조정
+                                                                </label>
+
+                                                                <div className="space-y-1">
+                                                                    <div className="flex justify-between text-xs text-slate-500">
+                                                                        <span>확대/축소</span>
+                                                                        <span>{results[selectedResultIndex].layout_config?.zoom || 100}%</span>
+                                                                    </div>
+                                                                    <Slider
+                                                                        value={[results[selectedResultIndex].layout_config?.zoom || 100]}
+                                                                        min={100}
+                                                                        max={200}
+                                                                        step={1}
+                                                                        onValueChange={([val]) => {
+                                                                            const currentConfig = results[selectedResultIndex].layout_config || {}
+                                                                            updateResult(selectedResultIndex, 'layout_config', { ...currentConfig, zoom: val })
+                                                                        }}
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-1">
+                                                                    <div className="flex justify-between text-xs text-slate-500">
+                                                                        <span>가로 위치</span>
+                                                                        <span>{results[selectedResultIndex].layout_config?.x || 0}%</span>
+                                                                    </div>
+                                                                    <Slider
+                                                                        value={[results[selectedResultIndex].layout_config?.x || 0]}
+                                                                        min={-50}
+                                                                        max={50}
+                                                                        step={1}
+                                                                        onValueChange={([val]) => {
+                                                                            const currentConfig = results[selectedResultIndex].layout_config || {}
+                                                                            updateResult(selectedResultIndex, 'layout_config', { ...currentConfig, x: val })
+                                                                        }}
+                                                                    />
+                                                                </div>
+
+                                                                <div className="space-y-1">
+                                                                    <div className="flex justify-between text-xs text-slate-500">
+                                                                        <span>세로 위치</span>
+                                                                        <span>{results[selectedResultIndex].layout_config?.y || 0}%</span>
+                                                                    </div>
+                                                                    <Slider
+                                                                        value={[results[selectedResultIndex].layout_config?.y || 0]}
+                                                                        min={-50}
+                                                                        max={50}
+                                                                        step={1}
+                                                                        onValueChange={([val]) => {
+                                                                            const currentConfig = results[selectedResultIndex].layout_config || {}
+                                                                            updateResult(selectedResultIndex, 'layout_config', { ...currentConfig, y: val })
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="space-y-2">
                                                         <label className="font-medium">상세 설명</label>
@@ -801,6 +883,6 @@ export function TestEditor({ initialData, mode }: TestEditorProps) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }

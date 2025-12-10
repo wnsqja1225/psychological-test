@@ -20,8 +20,19 @@ export default function AdminDashboard() {
     }, [])
 
     const fetchTests = async () => {
-        const { data, error } = await supabase.from('tests').select('*').order('created_at', { ascending: false })
-        if (data) setTests(data)
+        const { data, error } = await supabase
+            .from('tests')
+            .select('*, test_completions(count)')
+            .order('created_at', { ascending: false })
+
+        if (data) {
+            // Map the response to include view_count
+            const testsWithCounts = data.map((t: any) => ({
+                ...t,
+                view_count: t.test_completions?.[0]?.count || 0
+            }))
+            setTests(testsWithCounts)
+        }
     }
 
     const fetchResults = async () => {
@@ -235,6 +246,11 @@ export default function AdminDashboard() {
                                 <p className="text-xs text-muted-foreground line-clamp-1">
                                     {test.description || "설명 없음"}
                                 </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                        참여자 {test.view_count?.toLocaleString() || 0}명
+                                    </span>
+                                </div>
                             </CardHeader>
                             <CardFooter className="pt-0">
                                 <div className="flex gap-2 w-full">
